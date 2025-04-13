@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Empresas - Panel de Administrador del Sistema{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Empresas Registradas</h2>
+
+    <!-- Microempresas Integrales -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Microempresas Integrales</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Dirección</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for integral in integrales %}
+                        <tr>
+                            <td>{{ integral.usuario.username }}</td>
+                            <td>{{ integral.usuario.email }}</td>
+                            <td>{{ integral.direccion }}</td>
+                            <td>{{ integral.usuario.phone }}</td>
+                            <td>
+                                <span class="badge {% if integral.usuario.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ integral.usuario.is_active|yesno:"Activo,Inactivo" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'system_admin_edit_user' integral.usuario.id %}" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{% url 'system_admin_toggle_user' integral.usuario.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if integral.usuario.is_active %}btn-danger{% else %}btn-success{% endif %}" title="{% if integral.usuario.is_active %}Desactivar{% else %}Activar{% endif %}">
+                                            <i class="fas {% if integral.usuario.is_active %}fa-user-times{% else %}fa-user-check{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Microempresas Satélites -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Microempresas Satélites</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Dirección</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for satelite in satelites %}
+                        <tr>
+                            <td>{{ satelite.usuario.username }}</td>
+                            <td>{{ satelite.usuario.email }}</td>
+                            <td>{{ satelite.direccion }}</td>
+                            <td>{{ satelite.usuario.phone }}</td>
+                            <td>
+                                <span class="badge {% if satelite.usuario.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ satelite.usuario.is_active|yesno:"Activo,Inactivo" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'system_admin_edit_user' satelite.usuario.id %}" class="btn btn-sm btn-warning" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{% url 'system_admin_toggle_user' satelite.usuario.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if satelite.usuario.is_active %}btn-danger{% else %}btn-success{% endif %}" title="{% if satelite.usuario.is_active %}Desactivar{% else %}Activar{% endif %}">
+                                            <i class="fas {% if satelite.usuario.is_active %}fa-user-times{% else %}fa-user-check{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

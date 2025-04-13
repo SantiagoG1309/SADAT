@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Perfil de Usuario</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Nombre de Usuario:</strong></div>
+                        <div class="col-sm-8">{{ user.username }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Correo Electrónico:</strong></div>
+                        <div class="col-sm-8">{{ user.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Teléfono:</strong></div>
+                        <div class="col-sm-8">{{ user.phone|default:'No especificado' }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Dirección:</strong></div>
+                        <div class="col-sm-8">{{ user.address|default:'No especificada' }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><strong>Tipo de Usuario:</strong></div>
+                        <div class="col-sm-8">
+                            {% if user.is_cliente %}
+                                Cliente
+                            {% elif user.is_integral %}
+                                Microempresa Integral
+                            {% elif user.is_satelite %}
+                                Microempresa Satélite
+                            {% elif user.is_admin_role %}
+                                Administrador
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

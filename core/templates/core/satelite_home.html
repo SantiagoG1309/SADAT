@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Empresa Satélite{% endblock %}
+
+{% block content %}
+<style>
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+</style>
+<div class="row mb-4">
+    <div class="col">
+        <h2>Panel de Control - Empresa Satélite</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'add_service' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Agregar Servicio
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Mis Servicios de Confección</h5>
+            </div>
+            <div class="card-body">
+                {% if services %}
+                    <div class="list-group">
+                        {% for service in services %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ service.nombre }}</h5>
+                                    <div>
+                                        <a href="{% url 'edit_service' service.id %}" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'delete_service' service.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este servicio?')">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <p class="mb-1">{{ service.descripcion }}</p>
+                                <small class="text-muted">Precio: ${{ service.precio }}</small>
+                                <div class="mt-2">
+                                    <span class="badge bg-primary">{{ service.tipo_servicio }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i> No tienes servicios registrados. ¡Agrega tu primer servicio!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0 d-flex align-items-center">
+                    <i class="fas fa-bell me-2"></i>Solicitudes
+                    <span class="badge bg-primary ms-2">{{ solicitudes_pendientes|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body custom-scrollbar" style="max-height: 500px; overflow-y: auto;">
+                {% if solicitudes_pendientes %}
+                    <div class="list-group">
+                        {% for solicitud in solicitudes_pendientes %}
+                            <div class="list-group-item list-group-item-action hover-shadow">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <h5 class="mb-1 text-primary">{{ solicitud.servicio.nombre }}</h5>
+                                    <small class="text-muted"><i class="fas fa-clock me-1"></i>{{ solicitud.fecha_solicitud|date:"d/m/Y H:i" }}</small>
+                                </div>
+                                <p class="mb-1"><i class="fas fa-user me-2"></i>Cliente: {{ solicitud.cliente.usuario.get_full_name|default:solicitud.cliente.usuario.username }}</p>
+                                <p class="mb-1"><i class="fas fa-calendar me-2"></i>Fecha deseada: {{ solicitud.fecha_deseada|date:"d/m/Y" }}</p>
+                                {% if solicitud.comentarios %}
+                                    <p class="mb-2"><i class="fas fa-comment me-2"></i><small>{{ solicitud.comentarios }}</small></p>
+                                {% endif %}
+                                <div class="mt-2 d-flex gap-2">
+                                    {% if solicitud.estado == 'PENDIENTE' %}
+                                        <form action="{% url 'procesar_solicitud' solicitud.id 'aceptada' %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check me-1"></i>Aceptar
+                                            </button>
+                                        </form>
+                                        <form action="{% url 'procesar_solicitud' solicitud.id 'rechazada' %}" method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times me-1"></i>Rechazar
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="badge {% if solicitud.estado == 'EN_PROCESO' %}bg-info{% elif solicitud.estado == 'RECHAZADA' %}bg-danger{% elif solicitud.estado == 'CANCELADO' %}bg-secondary{% else %}bg-success{% endif %}">
+                                            <i class="fas {% if solicitud.estado == 'EN_PROCESO' %}fa-cog fa-spin{% elif solicitud.estado == 'RECHAZADA' %}fa-ban{% elif solicitud.estado == 'CANCELADO' %}fa-times{% else %}fa-check{% endif %} me-1"></i>
+                                            {{ solicitud.get_estado_display|default:solicitud.estado|title }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info d-flex align-items-center" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>No hay solicitudes en este momento.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Mi Perfil</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="card-subtitle mb-2 text-muted">Información de Contacto</h6>
+                    <p class="card-text">
+                        <i class="fas fa-phone me-2"></i> {{ user.phone }}<br>
+                        <i class="fas fa-map-marker-alt me-2"></i> {{ user.address }}
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="card-subtitle mb-2 text-muted">Especialidades</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-primary">Arreglos</span>
+                        <span class="badge bg-primary">Confección</span>
+                        <span class="badge bg-primary">Ajustes</span>
+                    </div>
+                </div>
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="fas fa-edit me-2"></i>Editar Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

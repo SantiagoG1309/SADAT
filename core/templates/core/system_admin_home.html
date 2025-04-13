@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Panel de Administración del Sistema</h2>
+
+    <!-- Estadísticas Generales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Usuarios Totales</h5>
+                    <h2 class="card-text">{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Productos</h5>
+                    <h2 class="card-text">{{ total_products }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Servicios</h5>
+                    <h2 class="card-text">{{ total_services }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pedidos</h5>
+                    <h2 class="card-text">{{ total_orders }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Usuarios -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Usuarios Registrados</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.get_role_display }}</td>
+                            <td>
+                                {% if user.is_active %}
+                                <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'system_admin_edit_user' user.id %}" class="btn btn-sm btn-primary">Editar</a>
+                                    <form method="post" action="{% url 'system_admin_toggle_user' user.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                            {% if user.is_active %}Desactivar{% else %}Activar{% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enlaces Rápidos -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestión de Empresas</h5>
+                    <p class="card-text">Administrar microempresas integrales y satélites.</p>
+                    <a href="{% url 'system_admin_companies' %}" class="btn btn-primary">Ver Empresas</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Transacciones</h5>
+                    <p class="card-text">Ver historial de transacciones y pagos.</p>
+                    <a href="{% url 'system_admin_transactions' %}" class="btn btn-primary">Ver Transacciones</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Configuración</h5>
+                    <p class="card-text">Ajustes generales del sistema.</p>
+                    <a href="#" class="btn btn-primary">Configurar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

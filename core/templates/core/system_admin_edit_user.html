@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Usuario - Panel de Administrador del Sistema{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Editar Usuario</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="editForm">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="text-danger">{{ error }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'system_admin_home' %}" class="btn btn-secondary">Cancelar</a>
+                            <div>
+                                <button type="submit" class="btn btn-primary me-2">Guardar Cambios</button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Eliminar Usuario</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Modal de confirmación de eliminación -->
+                    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro de que deseas eliminar al usuario {{ user_to_edit.username }}?
+                                    Esta acción no se puede deshacer.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <form method="POST" style="display: inline;">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete" value="true">
+                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Bienvenido a SADAT</h1>
+            
+            {% if user.is_authenticated %}
+                {% if user.is_integral %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Panel de Control - Microempresa Integral</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6>Mis Productos</h6>
+                            {% if products %}
+                                <div class="row">
+                                    {% for product in products %}
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card h-100">
+                                                {% if product.imagen %}
+                                                    <img src="{{ product.imagen.url }}" class="card-img-top" alt="{{ product.nombre }}">
+                                                {% endif %}
+                                                <div class="card-body">
+                                                    <h5 class="card-title">{{ product.nombre }}</h5>
+                                                    <p class="card-text">{{ product.descripcion|truncatechars:100 }}</p>
+                                                    <p class="card-text"><strong>Precio:</strong> ${{ product.precio }}</p>
+                                                    <div class="d-flex justify-content-between">
+                                                        <a href="{% url 'edit_product' product.id %}" class="btn btn-warning">Editar</a>
+                                                        <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Eliminar</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p>No tienes productos registrados.</p>
+                            {% endif %}
+                            <a href="{% url 'add_product' %}" class="btn btn-success mt-3">
+                                <i class="fas fa-plus"></i> Agregar Nuevo Producto
+                            </a>
+                        </div>
+                    </div>
+                {% elif user.is_satelite %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Panel de Control - Microempresa Satélite</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Bienvenido a tu panel de control como Microempresa Satélite.</p>
+                            <!-- Aquí irá el contenido específico para microempresas satélite -->
+                        </div>
+                    </div>
+                {% elif user.is_cliente %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Panel de Cliente</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Bienvenido a tu panel de cliente.</p>
+                            <!-- Aquí irá el contenido específico para clientes -->
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="jumbotron">
+                    <h2>Sistema de Administración de Trabajo</h2>
+                    <p class="lead">Conectamos microempresas integrales y satélites para una mejor gestión del trabajo.</p>
+                    <hr class="my-4">
+                    <p>Para comenzar, por favor inicia sesión o regístrate.</p>
+                    <div class="mt-4">
+                        <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">Iniciar Sesión</a>
+                        <a href="{% url 'register' %}" class="btn btn-success btn-lg">Registrarse</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

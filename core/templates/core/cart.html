@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carrito de Compras{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Carrito de Compras</h2>
+    </div>
+</div>
+
+<!-- Contenedor para toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                {% if items %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                    <tr data-product-id="{{ item.producto.id }}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.producto.imagen %}
+                                                    <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
+                                                {% else %}
+                                                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">{{ item.producto.nombre }}</h6>
+                                                    <small class="text-muted">{{ item.producto.microempresa_integral.usuario.username }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>$ {{ item.producto.precio|floatformat:2 }} COP</td>
+                                        <td>
+                                            <!-- Input de cantidad sin botón de actualización -->
+                                            <input type="number" name="quantity" value="{{ item.cantidad }}" min="1" class="form-control form-control-sm product-quantity" style="width: 70px;" readonly>
+                                        
+                                        </td>
+                                        <td>$ {{ item.get_subtotal|floatformat:2 }} COP</td>
+                                        <td>
+                                        
+                                            <!-- Botón de Eliminar Producto -->
+                                            <button class="btn btn-sm btn-danger remove-item-btn" data-product-id="{{ item.producto.id }}" title="Eliminar Producto">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+
+
+                                            
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <p class="lead">Tu carrito está vacío</p>
+                        <a href="{% url 'catalogo_integral' %}" class="btn btn-primary">
+                            <i class="fas fa-shopping-bag me-2"></i>Continuar Comprando
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Resumen de Compra</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Subtotal:</span>
+                    <span>$ {{ subtotal|floatformat:2 }} COP</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>IVA (19%):</span>
+                    <span>$ {{ iva|floatformat:2 }} COP</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total:</strong>
+                    <strong>$ {{ total|floatformat:2 }} COP</strong>
+                </div>
+                {% if items %}
+                    <a href="{% url 'catalogo_integral' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Continuar Comprando
+                    </a>
+
+                    <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        <i class="fas fa-credit-card me-2"></i>Proceder al Pago
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pago -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Método de Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" checked>
+                        <label class="form-check-label" for="creditCard">
+                            <i class="fas fa-credit-card me-2"></i>Tarjeta de Crédito/Débito
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="pse">
+                        <label class="form-check-label" for="pse">
+                            <i class="fas fa-university me-2"></i>PSE
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="nequi">
+                        <label class="form-check-label" for="nequi">
+                            <i class="fas fa-mobile-alt me-2"></i>Nequi/Daviplata
+                        </label>
+                    </div>
+                </div>
+                <form id="paymentForm">
+                    <div class="mb-3">
+                        <label for="cardNumber" class="form-label">Número de Tarjeta</label>
+                        <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="expiryDate" class="form-label">Fecha de Vencimiento</label>
+                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/AA">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cvv" placeholder="123">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="paymentForm" class="btn btn-success">
+                    <i class="fas fa-lock me-2"></i>Pagar $ {{ total|floatformat:2 }} COP
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart_page.js' %}"></script>
+{% endblock %}

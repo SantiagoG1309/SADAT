@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Mis Solicitudes de Servicio</h2>
+    
+    {% if solicitudes %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Servicio</th>
+                    <th>Empresa Satélite</th>
+                    <th>Fecha Solicitada</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for solicitud in solicitudes %}
+                <tr>
+                    <td>{{ solicitud.servicio.nombre }}</td>
+                    <td>{{ solicitud.microempresa_satelite.titulo }}</td>
+                    <td>{{ solicitud.fecha_deseada|date:"d/m/Y" }}</td>
+                    <td>${{ solicitud.servicio.precio|floatformat:2 }}</td>
+                    <td>
+                        <span class="badge {% if solicitud.estado == 'PENDIENTE' %}bg-warning
+                                     {% elif solicitud.estado == 'ACEPTADA' %}bg-success
+                                     {% elif solicitud.estado == 'RECHAZADA' %}bg-danger
+                                     {% elif solicitud.estado == 'EN_PROCESO' %}bg-info
+                                     {% elif solicitud.estado == 'COMPLETADO' %}bg-success
+                                     {% else %}bg-secondary{% endif %}">
+                            {{ solicitud.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if solicitud.estado == 'PENDIENTE' %}
+                        <form action="{% url 'cancelar_solicitud' solicitud.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que deseas cancelar esta solicitud?')">
+                                Cancelar
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No tienes solicitudes de servicio pendientes.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Toast container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="productToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body"></div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Panel de Control - Empresa Integral</h1>
+            <a href="{% url 'add_product' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus me-2"></i> Agregar Nuevo Producto
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if product.imagen %}
+                            <img src="{{ product.imagen.url }}" class="card-img-top p-3" alt="{{ product.nombre }}" style="height: 200px; object-fit: contain;">
+                        {% else %}
+                            <div class="bg-light text-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-image fa-3x"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold">{{ product.nombre }}</h5>
+                            <p class="card-text text-muted">{{ product.descripcion|truncatewords:30 }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary mb-0">$ {{ product.precio|floatformat:2 }} COP</span>
+                                <span class="badge bg-{% if product.stock > 10 %}success{% elif product.stock > 0 %}warning{% else %}danger{% endif %} p-2 stock-display" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-box me-1"></i> Stock: {{ product.stock }}
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <div class="input-group">
+                                    <button class="btn btn-outline-secondary decrease-stock" type="button" data-product-id="{{ product.id }}">-</button>
+                                    <input type="number" class="form-control text-center stock-input" id="stock{{ product.id }}" value="{{ product.stock }}" min="0" readonly style="-webkit-appearance: none; -moz-appearance: textfield;">
+                                    <button class="btn btn-outline-secondary increase-stock" type="button" data-product-id="{{ product.id }}">+</button>
+                                </div>
+                                <button class="btn btn-success confirm-stock" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-check me-2"></i> Confirmar Stock
+                                </button>
+                            </div>
+                            <div id="errorMessage{{ product.id }}" class="text-danger small" style="display: none;"></div>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 pb-3">
+                            <div class="d-flex justify-content-between gap-2">
+                                <a href="{% url 'edit_product' product.id %}" class="btn btn-warning flex-grow-1">
+                                    <i class="fas fa-edit me-2"></i> Editar
+                                </a>
+                                <button type="button" class="btn btn-danger flex-grow-1" data-bs-toggle="modal" data-bs-target="#deleteModal{{ product.id }}">
+                                    <i class="fas fa-trash me-2"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de confirmación para eliminar -->
+                <div class="modal fade" id="deleteModal{{ product.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ product.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel{{ product.id }}">Confirmar Eliminación</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Está seguro que desea eliminar el producto "{{ product.nombre }}"?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Eliminar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i> No tiene productos registrados. ¡Comience agregando uno!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('productToast');
+    const toastHeader = toast.querySelector('.toast-header');
+    const toastBody = toast.querySelector('.toast-body');
+
+    toastHeader.className = `toast-header ${type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-danger' : 'bg-danger'} text-white`;
+    const icon = toastHeader.querySelector('i');
+    icon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2`;
+    
+    toastBody.textContent = message;
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+
+function decrementStock(productId) {
+    const input = document.getElementById(`stock${productId}`);
+    const errorMessage = document.getElementById(`errorMessage${productId}`);
+    let value = parseInt(input.value) || 0;
+    if (value > 0) {
+        input.value = value - 1;
+        errorMessage.style.display = "none";
+    } else {
+        input.value = 0;
+        errorMessage.textContent = "El stock no puede ser menor que 0.";
+        errorMessage.style.display = "block";
+    }
+}
+
+function incrementStock(productId) {
+    const input = document.getElementById(`stock${productId}`);
+    const errorMessage = document.getElementById(`errorMessage${productId}`);
+    let value = parseInt(input.value) || 0;
+    input.value = value + 1;
+    errorMessage.style.display = "none";
+}
+
+function updateStock(productId) {
+    const stockInput = document.getElementById(`stock${productId}`);
+    const newStock = parseInt(stockInput.value);
+    const errorMessage = document.getElementById(`errorMessage${productId}`);
+
+    if (isNaN(newStock) || newStock < 0) {
+        showToast('El stock debe ser un número válido mayor o igual a 0.', 'warning');
+        return;
+    }
+
+    fetch(`/integral/update_stock/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ stock: newStock })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al actualizar el stock');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showToast('Stock actualizado exitosamente', 'success');
+            const stockBadge = document.querySelector(`.stock-display[data-product-id="${productId}"]`);
+            stockBadge.textContent = `Stock: ${data.new_stock}`;
+            stockBadge.className = `badge bg-${data.new_stock > 10 ? 'success' : data.new_stock > 0 ? 'warning' : 'danger'} p-2 stock-display`;
+            stockInput.value = data.new_stock;
+
+            // Emitir evento de actualización de stock para otras páginas
+            const stockUpdateEvent = {
+                productId: productId,
+                newStock: data.new_stock,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('stockUpdate', JSON.stringify(stockUpdateEvent));
+        } else {
+            showToast(data.error || 'Error al actualizar el stock.', 'warning');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error de conexión. Intente de nuevo.', 'warning');
+    });
+}
+
+// Asignar eventos a los botones
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.decrease-stock').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = button.getAttribute('data-product-id');
+            decrementStock(productId);
+        });
+    });
+
+    document.querySelectorAll('.increase-stock').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = button.getAttribute('data-product-id');
+            incrementStock(productId);
+        });
+    });
+
+    document.querySelectorAll('.confirm-stock').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const productId = button.getAttribute('data-product-id');
+            updateStock(productId);
+        });
+    });
+});
+</script>
+{% endblock %}

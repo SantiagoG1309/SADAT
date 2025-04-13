@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if empresa_actual %}{{ empresa_actual.titulo }}{% else %}Catálogo de Empresas{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f8f9fa;
+        color: #343a40;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        color: #343a40;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: #6c757d;
+    }
+
+    .button-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        width: 100%;
+        max-width: 1000px;
+    }
+
+    .catalog-btn {
+        flex: 1 1 300px;
+        max-width: 400px;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        white-space: nowrap;
+        text-align: center;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
+        color: #007bff;
+        border: 2px solid #ffffff;
+    }
+
+    .catalog-btn:hover {
+        background-color: #007bff;
+        color: #ffffff;
+        border-color: #007bff;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .catalog-btn {
+            font-size: 1rem;
+            padding: 12px 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="text-center">
+        <h1 class="hero-title">Bienvenido al Sistema SADAT</h1>
+        <p class="hero-subtitle">Explora nuestros catálogos de microempresas</p>
+    </div>
+
+    <div class="button-container">
+        <a href="{% url 'catalogo_integral' %}" class="btn catalog-btn">
+            <i class="fas fa-building me-2"></i>Catálogo Microempresas Integrales
+        </a>
+
+        <a href="{% url 'catalogo_satelite' %}" class="btn catalog-btn">
+            <i class="fas fa-tools me-2"></i>Catálogo Microempresas Satélite
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cliente_home.js' %}"></script>
+{% endblock %}

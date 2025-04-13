@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Solicitar Servicio - {{ servicio.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'home' %}?satelite={{ satelite.id }}">{{ satelite.titulo }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Solicitar Servicio</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title mb-0">Solicitar Servicio</h2>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4>Detalles del Servicio</h4>
+                    <p><strong>Nombre:</strong> {{ servicio.nombre }}</p>
+                    <p><strong>Descripción:</strong> {{ servicio.descripcion }}</p>
+                    <p><strong>Precio:</strong> ${{ servicio.precio }}</p>
+                    <p><strong>Tipo:</strong> {{ servicio.get_tipo_servicio_display }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h4>Microempresa Satélite</h4>
+                    <p><strong>Nombre:</strong> {{ satelite.titulo }}</p>
+                    {% if satelite.eslogan %}
+                        <p><strong>Eslogan:</strong> {{ satelite.eslogan }}</p>
+                    {% endif %}
+                    <p><strong>Dirección:</strong> {{ satelite.direccion }}</p>
+                </div>
+            </div>
+
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="fecha_deseada" class="form-label">Fecha Deseada</label>
+                    <input type="date" class="form-control" id="fecha_deseada" name="fecha_deseada" required>
+                </div>
+                <div class="mb-3">
+                    <label for="comentarios" class="form-label">Comentarios o Requisitos Especiales</label>
+                    <textarea class="form-control" id="comentarios" name="comentarios" rows="4"></textarea>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{% url 'home' %}?satelite={{ satelite.id }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validación del formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+});
+</script>
+{% endblock %}

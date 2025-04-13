@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Transacciones - Panel de Administrador del Sistema{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Transacciones del Sistema</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Monto</th>
+                            <th>Estado</th>
+                            <th>ID Transacción</th>
+                            <th>Tipo</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td>{{ transaction.id }}</td>
+                            <td>{{ transaction.fecha|date:"d/m/Y H:i" }}</td>
+                            <td>${{ transaction.monto }}</td>
+                            <td>
+                                <span class="badge {% if transaction.estado == 'COMPLETADO' %}bg-success
+                                             {% elif transaction.estado == 'PENDIENTE' %}bg-warning
+                                             {% else %}bg-danger{% endif %}">
+                                    {{ transaction.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>{{ transaction.id_transaccion_pasarela }}</td>
+                            <td>
+                                {% if transaction.pedido %}
+                                    Pedido Regular
+                                {% elif transaction.pedido_personalizado %}
+                                    Pedido Personalizado
+                                {% elif transaction.solicitud_confeccion %}
+                                    Solicitud de Confección
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if transaction.pedido %}
+                                    #{{ transaction.pedido.id }}
+                                {% elif transaction.pedido_personalizado %}
+                                    #{{ transaction.pedido_personalizado.id }}
+                                {% elif transaction.solicitud_confeccion %}
+                                    #{{ transaction.solicitud_confeccion.id }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

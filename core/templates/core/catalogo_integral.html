@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Microempresas Integrales{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Inicio</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Microempresas Integrales</li>
+            </ol>
+        </nav>
+        <h2 class="mb-4">Catálogo de Microempresas Integrales</h2>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for empresa in empresas %}
+        <div class="col">
+            <div class="card h-100">
+                {% if empresa.logo %}
+                    <img src="{{ empresa.logo.url }}" class="card-img-top" alt="{{ empresa.titulo }}" style="height: 200px; object-fit: contain; padding: 1rem;">
+                {% else %}
+                    <div class="bg-light text-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="fas fa-building fa-3x"></i>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ empresa.titulo }}</h5>
+                    {% if empresa.eslogan %}
+                        <p class="card-text text-muted">{{ empresa.eslogan }}</p>
+                    {% endif %}
+                    {% if empresa.descripcion %}
+                        <p class="card-text">{{ empresa.descripcion|truncatechars:150 }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <a href="{% url 'catalogo_productos_integral' empresa.id %}" class="btn btn-primary w-100">
+                        <i class="fas fa-shopping-bag me-2"></i>Ver Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                No hay microempresas integrales disponibles en este momento.
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
